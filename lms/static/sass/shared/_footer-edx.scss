@@ -276,9 +276,42 @@ footer#footer-edx-v3 {
         margin-top: 15px;
         border-right: 1px solid #e6e6e6;
         border-bottom: none;
+        height: 199px;
       }
-      ul.clear-margins:nth-of-type(3){
+      div.row div.col-md-3:nth-child(1){
+        padding: 20px 20px 0px 0;
+        text-align: center;
+      }
+      .app-link img{
+        height: 50px;
+      }
+      a.social-links{
+        font-size: 50px;
+      }
+
+      div.row div:nth-child(4) ul.clear-margins{
         border-right: none;
+      }
+      .social{
+        display: inline-block;
+        vertical-align:middle;
+        margin-top: 20px;
+      }
+     .app-links{
+        display: inline-block;
+       vertical-align:middle;
+
+      }
+      .widget_nav_menu ul li {
+          font-size: 20px;
+        }
+      h3 {
+      font-size: 20px !important;
+      font-weight: 700;
+
+      }
+      .footer-language-selector {
+        float: none;
       }
 
       ul.social li {
