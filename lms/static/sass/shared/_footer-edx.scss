@@ -23,12 +23,12 @@ footer#footer-edx-v3 {
     margin-right: auto;
     margin-left: auto;
   }
-  h3{
-    font-size: 16px !important;
+  ul li h3{
+    font-size: 16px ;
     font-weight: 600;
     padding:5px 0; 
-    color: #646464 !important;
-    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif !important;
+    color: #646464;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
   }
   .widget_nav_menu ul {
       list-style: outside none none;
@@ -36,7 +36,7 @@ footer#footer-edx-v3 {
       margin-bottom: 15px; 
   }
    .widget_nav_menu ul li{  
-      font-family: "Helvetica Neue",Helvetica,Arial,sans-serif !important;
+      font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
   }
 
   .footer-language-selector{
@@ -195,7 +195,7 @@ footer#footer-edx-v3 {
   }
     a.social-links {
     @include margin(0, -7px, 10px, 0px);
-    @include font-size(40);
+    @include font-size(45);
     @include line-height(28);
     line-height: 1;
     position: relative;
@@ -278,10 +278,10 @@ footer#footer-edx-v3 {
         border-bottom: none;
         height: 199px;
       }
-      div.row div.col-md-3:nth-child(1){
-        padding: 20px 20px 0px 0;
-        text-align: center;
-      }
+      //div.row div.col-md-3:nth-child(1){
+      //  padding: 20px 20px 0px 0;
+      //  text-align: center;
+      //}
       .app-link img{
         height: 50px;
       }
@@ -305,8 +305,8 @@ footer#footer-edx-v3 {
       .widget_nav_menu ul li {
           font-size: 20px;
         }
-      h3 {
-      font-size: 20px !important;
+      ul li h3 {
+      font-size: 20px;
       font-weight: 700;
 
       }
@@ -315,8 +315,117 @@ footer#footer-edx-v3 {
       }
 
       ul.social li {
-        display: table-cell;
-        width: 0%;
+        display: inline-flex;
+        width: auto;
+      }
+  }
+
+
+  @include media( $edx-footer-bp-large ) {
+    padding: 20px 10px;
+
+    .site-details {
+      @include span-columns(8);
+    }
+
+    .external-links {
+      @include span-columns(4);
+    }
+
+    .social-media-links,
+    .mobile-app-links {
+      @include float(right);
+    }
+
+    .social-media-links {
+      margin-bottom: 40px;
+    }
+    .edx-col-md-12{
+      width: 100%;
+      float: left;
+      position: relative;
+      min-height: 1px;
+      padding-right: 15px;
+      padding-left: 15px;
+    }
+
+    .edx-col-md-offset-0 {
+    margin-left: 0;
+    }
+    .edx-col-md-3{
+      width: 25%;
+      float: left;
+      position: relative;
+      min-height: 1px;
+      padding-right: 15px;
+      padding-left: 15px;
+    }
+    .edx-col-md-2{
+      width: 16.66666667%;
+      float: left;
+      position: relative;
+      min-height: 1px;
+      padding-right: 15px;
+      padding-left: 15px;
+    }
+    .edx-col-md-5{
+      width: 41.66666667%;
+      float: left;
+      position: relative;
+      min-height: 1px;
+      padding-right: 15px;
+      padding-left: 15px;
+    }
+
+
+      ul.clear-margins{
+        margin-top: 15px;
+        border-right: 1px solid #e6e6e6;
+        border-bottom: none;
+        height: 199px;
+      }
+      div.row div.edx-col-md-3:nth-child(1){
+        padding: 0px 0px 0px 15px;
+        text-align: justify;
+      }
+      .app-link img{
+        height: 50px;
+      }
+      a.social-links{
+        font-size: 50px;
+      }
+
+      div.row div:nth-child(4) ul.clear-margins{
+        border-right: none;
+      }
+      .social{
+        display: inline-block;
+        vertical-align:middle;
+        margin-top: 20px;
+      }
+     .app-links{
+        display: inline-block;
+       vertical-align:middle;
+
+      }
+      .widget_nav_menu ul li {
+          font-size: 17px;
+          padding-bottom: 5px;
+        }
+      ul li h3 {
+      font-size: 16px;
+      font-weight: 700;
+        padding-bottom: 10px;
+
+      }
+      .footer-language-selector {
+        float: none;
+        display: inline-block;
+      }
+
+      ul.social li {
+        display: inline;
+        //width: 0%;
       }
   }
   @include media( $edx-bp-medium ) {
@@ -412,6 +521,13 @@ footer#footer-edx-v3 {
 
     .social-media-links {
       margin-bottom: 50px;
+    }
+          ul.social li {
+        display: inline;
+        //width: 0%;
+      }
+    div.row div.edx-col-xs-12 div.col-md-3:nth-child(1){
+      text-align: center;
     }
   }
 
