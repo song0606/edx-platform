@@ -368,8 +368,8 @@ footer#footer-edx-v3 {
       padding-right: 15px;
       padding-left: 15px;
     }
-    .edx-col-md-5{
-      width: 41.66666667%;
+    .edx-col-md-4{
+      width: 33.33333333%;
       float: left;
       position: relative;
       min-height: 1px;
@@ -388,11 +388,16 @@ footer#footer-edx-v3 {
         padding: 0px 0px 0px 15px;
         text-align: justify;
       }
+
+      .left-offset{
+
+        margin-left: 17%;
+      }
       .app-link img{
-        height: 50px;
+        height: 43px;
       }
       a.social-links{
-        font-size: 50px;
+        font-size: 43px;
       }
 
       div.row div:nth-child(4) ul.clear-margins{
