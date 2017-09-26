@@ -5,6 +5,7 @@
 var path = require('path');
 var webpack = require('webpack');
 var BundleTracker = require('webpack-bundle-tracker');
+// var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var StringReplace = require('string-replace-webpack-plugin');
 
 var isProd = process.env.NODE_ENV === 'production';
@@ -19,6 +20,7 @@ var wpconfig = {
 
     entry: {
         // Studio
+        AssetsPage: './node_modules/@edx/studio-frontend/src/index.jsx',
         Import: './cms/static/js/features/import/factories/import.js',
         StudioIndex: './cms/static/js/features_jsx/studio/index.jsx',
 
@@ -42,6 +44,7 @@ var wpconfig = {
     devtool: isProd ? false : 'source-map',
 
     plugins: [
+        // new ExtractTextPlugin('node_modules/@edx/studio-frontend/dist/studio-frontend.min.css'),
         new webpack.NoEmitOnErrorsPlugin(),
         new webpack.NamedModulesPlugin(),
         new webpack.DefinePlugin({
@@ -110,6 +113,44 @@ var wpconfig = {
                 use: 'babel-loader'
             },
             {
+                test: /\.(js|jsx)$/,
+                include: [
+                    /studio-frontend/,
+                    /paragon/
+                ],
+                use: 'babel-loader'
+                // this should be be combined with the "exclude: /node_modules/" above, but I can't get it working
+            },
+            {
+                test: /(.scss|.css)$/,
+                include: [
+                    /studio-frontend/,
+                    /paragon/,
+                    /font-awesome/
+                ],
+                use: [
+                    'style-loader',
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            sourceMap: true,
+                            modules: true,
+                            localIdentName: '[path][name]__[local]--[hash:base64:5]'
+                        }
+                    },
+                    {
+                        loader: 'sass-loader',
+                        options: {
+                            sourceMap: true,
+                            data: '@import "bootstrap/scss/bootstrap-reboot";',
+                            includePaths: [
+                                path.join(__dirname, './node_modules/')
+                            ]
+                        }
+                    }
+                ]
+            },
+            {
                 test: /\.coffee$/,
                 exclude: /node_modules/,
                 use: 'coffee-loader'
@@ -129,7 +170,37 @@ var wpconfig = {
                             'exports-loader?this.AjaxPrefix!../../../../common/static/coffee/src/ajax_prefix.coffee'
                     }
                 }
+            },
+            {
+                test: /\.(woff2?|ttf|svg|eot)(\?v=\d+\.\d+\.\d+)?$/,
+                loader: 'file-loader'
             }
+            /* {
+                test: /(.scss|.css)$/,
+                use: ExtractTextPlugin.extract({
+                    fallback: 'style-loader',
+                    use: [
+                        {
+                            loader: 'css-loader',
+                            options: {
+                                sourceMap: true,
+                                modules: true,
+                                minimize: true,
+                            },
+                        },
+                        {
+                            loader: 'sass-loader',
+                            options: {
+                                sourceMap: true,
+                                data: '@import "bootstrap/scss/bootstrap-reboot";',
+                                includePaths: [
+                                    path.join(__dirname, '../node_modules'),
+                                ],
+                            },
+                        },
+                    ],
+                }),
+            },*/
         ]
     },
 
