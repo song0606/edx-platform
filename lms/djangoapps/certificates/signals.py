@@ -9,16 +9,14 @@ from django.dispatch import receiver
 from certificates.models import (
     CertificateGenerationCourseSetting,
     CertificateWhitelist,
-    CertificateStatuses,
     GeneratedCertificate
 )
-from certificates.tasks import generate_certificate
+from certificates.tasks import generate_certificate, send_passing_learner_message
 from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
 from lms.djangoapps.verify_student.models import SoftwareSecurePhotoVerification
 from openedx.core.djangoapps.certificates.api import auto_certificate_generation_enabled
-from openedx.core.djangoapps.certificates.config import waffle
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
-from openedx.core.djangoapps.signals.signals import COURSE_GRADE_NOW_PASSED, LEARNER_NOW_VERIFIED
+from openedx.core.djangoapps.signals.signals import COURSE_GRADE_NOW_PASSED, LEARNER_NOW_VERIFIED, COURSE_CERT_AWARDED
 from student.models import CourseEnrollment
 
 
@@ -103,3 +101,9 @@ def fire_ungenerated_certificate_task(user, course_key, expected_verification_st
             kwargs['expected_verification_status'] = unicode(expected_verification_status)
         generate_certificate.apply_async(countdown=CERTIFICATE_DELAY_SECONDS, kwargs=kwargs)
         return True
+
+
+@receiver(COURSE_CERT_AWARDED)
+def handle_course_cert_awarded(sender, user, course_key, mode, status, **kwargs):  # pylint: disable=unused-argument
+    log.info('Cert awarded')
+    send_passing_learner_message.apply_async((user.id, str(course_key)), retry=False)
