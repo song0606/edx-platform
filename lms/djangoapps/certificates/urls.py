@@ -30,4 +30,5 @@ urlpatterns = patterns(
     url(r'search', views.search_certificates, name="search"),
     url(r'regenerate', views.regenerate_certificate_for_user, name="regenerate_certificate_for_user"),
     url(r'generate', views.generate_certificate_for_user, name="generate_certificate_for_user"),
+    url(r'shipping_information', views.shipping_information, name="shipping_information"),
 )
