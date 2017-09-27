@@ -6,9 +6,11 @@ import json
 import logging
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.core.urlresolvers import reverse
+from django.shortcuts import redirect
+from edxmako.shortcuts import render_to_response
 
-from lms.djangoapps.experiments.models import ExperimentData
+from experiments.models import ExperimentData
 
 log = logging.getLogger(__name__)
 PHYSICAL_CERTIFICATE_EXPERIMENT_ID = 100
@@ -16,7 +18,7 @@ PHYSICAL_CERTIFICATE_EXPERIMENT_KEY = "shipping_information"
 
 
 @login_required
-def shipping_information(request, pk, template_name='certificates/shipping_form.html'):
+def shipping_information(request, template_name='certificates/shipping_information.html'):
     default_shipping_json = {
         'first_name': "",
         'last_name': "",
@@ -26,11 +28,11 @@ def shipping_information(request, pk, template_name='certificates/shipping_form.
         'zip_code': ""
     }
     if request.method == 'GET':
-        shipping_information = ExperimentData.objects.get_or_create(
+        shipping_information, created = ExperimentData.objects.get_or_create(
             user=request.user,
             experiment_id=PHYSICAL_CERTIFICATE_EXPERIMENT_ID,
             key=PHYSICAL_CERTIFICATE_EXPERIMENT_KEY,
-            defaults=json.dumps(default_shipping_json)
+            defaults={'value': json.dumps(default_shipping_json)},
         )
 
         shipping_json = json.loads(shipping_information.value)
@@ -61,6 +63,6 @@ def shipping_information(request, pk, template_name='certificates/shipping_form.
         shipping_information.value = json.dumps(shipping_json)
         shipping_information.save()
 
-        return redirect('shipping_information')
+        return redirect(reverse('certificates:shipping_information'))
 
-    return render(request, template_name, {'object': shipping_json})
+    return render_to_response(template_name, {'object': shipping_json})
