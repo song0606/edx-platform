@@ -23,6 +23,10 @@ footer#footer-edx-v3 {
     margin-right: auto;
     margin-left: auto;
   }
+  div > div > div:nth-child(2) > div.col-lg-2.edx-col-md-2.col-md-3.col-sm-3 > ul{
+    border: none;
+  }
+
   ul li h3{
     font-size: 16px ;
     font-weight: 600;
@@ -288,6 +292,9 @@ footer#footer-edx-v3 {
       a.social-links{
         font-size: 50px;
       }
+     div > div > div:nth-child(2) > div.col-lg-2.edx-col-md-2.col-md-3.col-sm-3 > ul{
+           border:  none;
+    }
 
       div.row div:nth-child(4) ul.clear-margins{
         border-right: none;
@@ -303,10 +310,10 @@ footer#footer-edx-v3 {
 
       }
       .widget_nav_menu ul li {
-          font-size: 20px;
+          font-size: 17px;
         }
       ul li h3 {
-      font-size: 20px;
+      font-size: 17px;
       font-weight: 700;
 
       }
@@ -451,6 +458,7 @@ footer#footer-edx-v3 {
       padding-right: 15px;
       padding-left: 15px;
     }
+
     .site-details {
       @include span-columns(8);
     }
@@ -523,6 +531,10 @@ footer#footer-edx-v3 {
     .external-links {
       @include span-columns(3);
     }
+     .widget_nav_menu ul li {
+          font-size: 17px;
+
+     }
 
     .social-media-links {
       margin-bottom: 50px;
@@ -534,6 +546,9 @@ footer#footer-edx-v3 {
     div.row div.edx-col-xs-12 div.col-md-3:nth-child(1){
       text-align: center;
     }
+      div > div > div:nth-child(2) > div.col-lg-2.edx-col-md-2.col-md-3.col-sm-3 > ul{
+    border-right:  1px solid #e6e6e6;
+  }
   }
 
     div.row div:nth-child(4) ul.clear-margins{
