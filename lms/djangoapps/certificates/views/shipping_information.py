@@ -63,6 +63,4 @@ def shipping_information(request, template_name='certificates/shipping_informati
         shipping_information.value = json.dumps(shipping_json)
         shipping_information.save()
 
-        return redirect(reverse('certificates:shipping_information'))
-
     return render_to_response(template_name, {'object': shipping_json})
