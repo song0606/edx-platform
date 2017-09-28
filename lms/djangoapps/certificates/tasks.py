@@ -64,8 +64,6 @@ class PassedCourse(MessageType):
 
 @task(ignore_result=True, routing_key=ACE_ROUTING_KEY)
 def send_passing_learner_message(user_id, course_key_str):
-    # TODO: check to see if they are in the experiment
-    # TODO: check the group they are in on the receipt page and record that in the experiment data table
     try:
         user = User.objects.get(id=user_id)
         course_key = CourseKey.from_string(course_key_str)
@@ -74,9 +72,8 @@ def send_passing_learner_message(user_id, course_key_str):
         def absolute_url(relative_path):
             return u'{}{}'.format(settings.LMS_ROOT_URL, urlquote(relative_path))
 
-        # reverse(shipping_information)
         context = {
-            'shipping_address_form_url': absolute_url('/certificates/shipping_information'),
+            'shipping_address_form_url': absolute_url(reverse('certificates:shipping_information')),
             'course_name': course.display_name,
         }
 
@@ -89,7 +86,6 @@ def send_passing_learner_message(user_id, course_key_str):
             context,
         )
 
-        logger.info('Sending message %s', msg)
         ace.send(msg)
     except:
         logger.exception('')

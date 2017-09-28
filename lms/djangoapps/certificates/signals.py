@@ -105,5 +105,5 @@ def fire_ungenerated_certificate_task(user, course_key, expected_verification_st
 
 @receiver(COURSE_CERT_AWARDED)
 def handle_course_cert_awarded(sender, user, course_key, mode, status, **kwargs):  # pylint: disable=unused-argument
-    log.info('Cert awarded')
+    # TODO: check to see if they are in the experiment by looking at the experiment data table
     send_passing_learner_message.apply_async((user.id, str(course_key)), retry=False)
