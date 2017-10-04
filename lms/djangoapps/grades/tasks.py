@@ -50,7 +50,7 @@ def locked_task(expiry_seconds):
     def task_decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            cache_key = '{}-{}'.format(func.__name__, kwargs['key'])
+            cache_key = '{}-{}'.format(func.__name__, kwargs['course_key'])
             if cache.add(cache_key, "true", expiry_seconds):
                 try:
                     func(*args, **kwargs)
@@ -67,8 +67,8 @@ class _BaseTask(PersistOnFailureTask, LoggedTask):  # pylint: disable=abstract-m
     abstract = True
 
 
-@locked_task(expiry_seconds=POLICY_CHANGE_GRADES_EXPIRY)
 @task(base=_BaseTask, routing_key=settings.POLICY_CHANGE_GRADES_ROUTING_KEY, )
+@locked_task(expiry_seconds=POLICY_CHANGE_GRADES_EXPIRY)
 def compute_all_grades_for_course(**kwargs):
     """
     Compute grades for all students in the specified course.

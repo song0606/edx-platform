@@ -99,7 +99,7 @@ def handle_grading_policy_changed(sender, **kwargs):
         'course_key': unicode(kwargs.get('course_key')),
         'event_transaction_id': unicode(get_event_transaction_id()),
         'event_transaction_type': unicode(get_event_transaction_type()),
-        'countdown': 1800, # 30 minute countdown
+        'countdown': 1800,  # 30 minute countdown
     }
     result = compute_all_grades_for_course.apply_async(kwargs=kwargs)
     log.info("Grades: Created {task_name}[{task_id}] with arguments {kwargs}".format(
