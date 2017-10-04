@@ -2,22 +2,20 @@
   font-size: 16px;
 
   h1{
-    font-weight: $font-semibold;
+    font-weight: bold;
   }
   .logo{
     height:100px;
   }
 
   h3{
-    font-weight: $font-semibold;
     margin-bottom:20px;
-    color: #4e4e4e;
+    color: theme-color("dark");
   }
   hr{
     height:4px;
     border:0;
-    background-color:theme-color('primary');
-    border-color:theme-color('primary');
+    background-color:theme-color('secondary');
   }
 
   .main-banner{
@@ -25,7 +23,7 @@
     margin-bottom:1px;
 
     .authoring-org-logo {
-      background-color:white;
+      background-color:$white;
     }
 
     .btn{
@@ -37,12 +35,12 @@
     }
   }
   .quick-nav{
-    background-color:#ccccff;
+    background-color: theme-color('light');
     margin-bottom:10px;
 
     .nav-item{
       font-size:18px;
-      color:#fff;
+      color:$white;
     }
   }
   .program-info{
@@ -56,17 +54,17 @@
     }
 
     .facts{
-      border: 1px solid #777;
+      border: 1px solid theme-color('dark');
 
       li{
         margin: 0 20px;
         padding: 15px 0px;
-        border-bottom: 1px solid #777;
+        border-bottom: 1px solid theme-color('light');
 
         .label{
           display:inline-block;
           width:48%;
-          color:#444;
+          color:theme-color('dark');
         }
 
         .description{
@@ -80,7 +78,7 @@
           .green-highlight{
             font-size:18px;
             color:theme-color('success');
-            font-weight: $font-bold;
+            font-weight: bold;
           }
         }
 
@@ -137,7 +135,7 @@
       }
 
       .instructor-position{
-        font-weight: $font-light;
+        font-weight: bold;
       }
     }
   }
