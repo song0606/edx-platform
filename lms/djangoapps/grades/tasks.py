@@ -40,7 +40,22 @@ KNOWN_RETRY_ERRORS = (  # Errors we expect occasionally, should be resolved on r
     ValidationError,
     DatabaseNotReadyError,
 )
+POLICY_CHANGE_GRADES_EXPIRY = 60 * 60
 RECALCULATE_GRADE_DELAY = 2  # in seconds, to prevent excessive _has_db_updated failures. See TNL-6424.
+
+
+def locked_task(expiry_seconds):
+    def task_decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            cache_key = '{}-{}'.format(func.__name__, kwargs['key'])
+            if cache.add(cache_key, "true", expiry_seconds):
+                try:
+                    func(*args, **kwargs)
+                finally:
+                    cache.delete(cache_key)
+        return wrapper
+    return task_decorator
 
 
 class _BaseTask(PersistOnFailureTask, LoggedTask):  # pylint: disable=abstract-method
