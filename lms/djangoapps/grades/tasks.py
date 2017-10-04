@@ -2,6 +2,7 @@
 This module contains tasks for asynchronous execution of grade updates.
 """
 
+from functools import wraps
 from logging import getLogger
 
 import six
@@ -11,6 +12,7 @@ from celery_utils.persist_on_failure import PersistOnFailureTask
 from courseware.model_data import get_score
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db.utils import DatabaseError
 from lms.djangoapps.course_blocks.api import get_course_blocks
@@ -65,7 +67,8 @@ class _BaseTask(PersistOnFailureTask, LoggedTask):  # pylint: disable=abstract-m
     abstract = True
 
 
-@task(base=_BaseTask, routing_key=settings.POLICY_CHANGE_GRADES_ROUTING_KEY)
+@locked_task(expiry_seconds=POLICY_CHANGE_GRADES_EXPIRY)
+@task(base=_BaseTask, routing_key=settings.POLICY_CHANGE_GRADES_ROUTING_KEY, )
 def compute_all_grades_for_course(**kwargs):
     """
     Compute grades for all students in the specified course.
