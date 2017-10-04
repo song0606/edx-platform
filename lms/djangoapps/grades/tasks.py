@@ -42,7 +42,7 @@ KNOWN_RETRY_ERRORS = (  # Errors we expect occasionally, should be resolved on r
     ValidationError,
     DatabaseNotReadyError,
 )
-POLICY_CHANGE_GRADES_EXPIRY = 60 * 60
+POLICY_CHANGE_GRADES_EXPIRY = 60 * 60 * 24
 RECALCULATE_GRADE_DELAY = 2  # in seconds, to prevent excessive _has_db_updated failures. See TNL-6424.
 
 
