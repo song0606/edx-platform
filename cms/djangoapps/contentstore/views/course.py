@@ -425,39 +425,18 @@ def _accessible_courses_list_from_groups(request):
         """ CCXs cannot be edited in Studio and should not be shown in this dashboard """
         return not isinstance(course_access.course_id, CCXLocator)
 
-    courses_list = {}
-    in_process_course_actions = []
-
     instructor_courses = UserBasedRole(request.user, CourseInstructorRole.ROLE).courses_with_role()
     staff_courses = UserBasedRole(request.user, CourseStaffRole.ROLE).courses_with_role()
     all_courses = filter(filter_ccx, instructor_courses | staff_courses)
 
-    for course_access in all_courses:
-        course_key = course_access.course_id
-        if course_key is None:
-            # If the course_access does not have a course_id, it's an org-based role, so we fall back
-            raise AccessListFallback
-        if course_key not in courses_list:
-            # check for any course action state for this course
-            in_process_course_actions.extend(
-                CourseRerunState.objects.find_all(
-                    exclude_args={'state': CourseRerunUIStateManager.State.SUCCEEDED},
-                    should_display=True,
-                    course_key=course_key,
-                )
-            )
-            # check for the course itself
-            try:
-                course = modulestore().get_course(course_key)
-            except ItemNotFoundError:
-                # If a user has access to a course that doesn't exist, don't do anything with that course
-                pass
+    course_ids = [course_access.course_id for course_access in all_courses]
 
-            if course is not None and not isinstance(course, ErrorDescriptor):
-                # ignore deleted, errored or ccx courses
-                courses_list[course_key] = course
+    if None in course_ids:
+        raise AccessListFallback
 
-    return courses_list.values(), in_process_course_actions
+    courses_list = CourseOverview.objects.filter(id__in=course_ids)
+
+    return courses_list, []
 
 
 def _accessible_libraries_iter(user, org=None):
