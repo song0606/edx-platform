@@ -86,8 +86,9 @@
       .organization-credentials-content {
         margin-top: ($baseline*1.6);
         .org-credentials-wrapper input {
-          width: 75%;
+          width: 65%;
           margin: ($baseline*0.8) 0;
+          display: inline-block;
         }
         .action-update-org-credentials {
           margin-top: ($baseline*1.6);

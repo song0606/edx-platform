@@ -464,6 +464,30 @@ define(
                 verifyOrganizationCredentialField('api-key', 'API Key');
             });
 
+            it('shows username input field if selected provider is Cielo', function() {
+                // Cielo is currently selected provider.
+                // Click change button to render organization credentials view.
+                $courseVideoSettingsEl.find('.action-change-provider').click();
+
+                // Verify cielo api key and username fields are present.
+                verifyOrganizationCredentialField('api-key', 'API Key');
+                verifyOrganizationCredentialField('username', 'Username');
+            });
+
+            it('does not show username input field if selected provider is 3Play Media', function() {
+                // Set selected provider to 3Play Media
+                changeProvider('3PlayMedia');
+
+                // Verify cielo username field is not present.
+                expect(
+                    $courseVideoSettingsEl.find('.' + courseVideoSettingsView.selectedProvider + '-username')
+                ).not.toExist();
+
+                // Verify api key and api secret input fields are present.
+                verifyOrganizationCredentialField('api-key', 'API Key');
+                verifyOrganizationCredentialField('api-secret', 'API Secret');
+            });
+
             it('shows warning message when changing organization credentials if present already', function() {
                 // Set selectedProvider organization credentials.
                 courseVideoSettingsView.transcriptOrganizationCredentials[courseVideoSettingsView.selectedProvider] = true; // eslint-disable-line max-len
@@ -516,14 +540,17 @@ define(
             });
 
             it('saves organization credentials on clicking save credentials button', function() {
-                var requests = AjaxHelpers.requests(this);
+                var requests = AjaxHelpers.requests(this),
+                    apiKey = 'test-api-key',
+                    username = 'test-username';
 
                 verifyProviderSelectedView();
                 // Click change button to render organization credentials view.
                 $courseVideoSettingsEl.find('.action-change-provider').click();
 
                 // Set organization credentials so as to pass validations.
-                $courseVideoSettingsEl.find('.' + courseVideoSettingsView.selectedProvider + '-api-key').val('testkey');
+                $courseVideoSettingsEl.find('.' + courseVideoSettingsView.selectedProvider + '-api-key').val(apiKey);
+                $courseVideoSettingsEl.find('.' + courseVideoSettingsView.selectedProvider + '-username').val(username);
 
                 // Click save organization credentials button to save credentials.
                 $courseVideoSettingsEl.find('.action-update-org-credentials').click();
@@ -533,7 +560,9 @@ define(
                     'POST',
                     transcriptCredentialsHandlerUrl,
                     JSON.stringify({
-                        provider: activeTranscriptPreferences.provider,
+                        provider: courseVideoSettingsView.selectedProvider,
+                        api_key: apiKey,
+                        username: username,
                         global: false
                     })
                 );
@@ -546,10 +575,17 @@ define(
                     'success',
                     transcriptionPlans[courseVideoSettingsView.selectedProvider].display_name + ' credentials saved'
                 );
+
+                // Also verify that transcript credential state is updated.
+                expect(
+                    courseVideoSettingsView.transcriptOrganizationCredentials[courseVideoSettingsView.selectedProvider]
+                ).toBeTruthy();
             });
 
             it('shows selected provider view afer organization credentials saved', function() {
-                var requests = AjaxHelpers.requests(this);
+                var requests = AjaxHelpers.requests(this),
+                    apiKey = 'test-api-key',
+                    username = 'test-username';
                 renderCourseVideoSettingsView(null, transcriptionPlans);
 
                 // Verify selected provider view is not shown.
@@ -565,7 +601,8 @@ define(
                 verifyProviderList(providers.Cielo24);
 
                 // Set organization credentials so as to pass validations.
-                $courseVideoSettingsEl.find('.' + courseVideoSettingsView.selectedProvider + '-api-key').val('testkey');
+                $courseVideoSettingsEl.find('.' + courseVideoSettingsView.selectedProvider + '-api-key').val(apiKey);
+                $courseVideoSettingsEl.find('.' + courseVideoSettingsView.selectedProvider + '-username').val(username);
 
                 // Click save organization credentials button to save credentials.
                 $courseVideoSettingsEl.find('.action-update-org-credentials').click();
@@ -575,7 +612,9 @@ define(
                     'POST',
                     transcriptCredentialsHandlerUrl,
                     JSON.stringify({
-                        provider: activeTranscriptPreferences.provider,
+                        provider: courseVideoSettingsView.selectedProvider,
+                        api_key: apiKey,
+                        username: username,
                         global: false
                     })
                 );
@@ -599,14 +638,17 @@ define(
             });
 
             it('shows error message on saving organization credentials if server sends error', function() {
-                var requests = AjaxHelpers.requests(this);
+                var requests = AjaxHelpers.requests(this),
+                    apiKey = 'test-api-key',
+                    username = 'test-username';
 
                 verifyProviderSelectedView();
                 // Click change button to render organization credentials view.
                 $courseVideoSettingsEl.find('.action-change-provider').click();
 
                 // Set organization credentials so as to pass validations.
-                $courseVideoSettingsEl.find('.' + courseVideoSettingsView.selectedProvider + '-api-key').val('testkey');
+                $courseVideoSettingsEl.find('.' + courseVideoSettingsView.selectedProvider + '-api-key').val(apiKey);
+                $courseVideoSettingsEl.find('.' + courseVideoSettingsView.selectedProvider + '-username').val(username);
 
                 // Click save organization credentials button to save credentials.
                 $courseVideoSettingsEl.find('.action-update-org-credentials').click();
@@ -616,7 +658,9 @@ define(
                     'POST',
                     transcriptCredentialsHandlerUrl,
                     JSON.stringify({
-                        provider: activeTranscriptPreferences.provider,
+                        provider: courseVideoSettingsView.selectedProvider,
+                        api_key: apiKey,
+                        username: username,
                         global: false
                     })
                 );
