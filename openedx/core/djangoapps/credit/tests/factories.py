@@ -51,7 +51,8 @@ class CreditRequestFactory(factory.DjangoModelFactory):
         Sets up parameters field.
         """
         if not obj.parameters:
-            # Something in the factory isn't correctly setting these keys so we need to clean up here
+            # The factory is creating these keys as strings, in Django 1.9+ they don't get automatically
+            # marshalled to CourseKey objects, so this ensures they are created as expected.
             course_key = CourseKey.from_string(obj.course.course_key)
             user = User.objects.get(username=obj.username)
             user_profile = user.profile
