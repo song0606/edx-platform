@@ -332,14 +332,14 @@ def _cert_info(user, course_overview, cert_status, course_mode):  # pylint: disa
         CertificateStatuses.auditing: 'auditing',
         CertificateStatuses.audit_passing: 'auditing',
         CertificateStatuses.audit_notpassing: 'auditing',
-        CertificateStatuses.unverified: 'unverified',
+        CertificateStatuses.unverified: 'unverified'
     }
 
     default_status = 'processing'
 
     default_info = {
         'status': default_status,
-        'certificate_message_viewable': False,
+        'certificate_hidden': True,
         'show_disabled_download_button': False,
         'show_download_url': False,
         'show_survey_button': False,
@@ -352,13 +352,19 @@ def _cert_info(user, course_overview, cert_status, course_mode):  # pylint: disa
     is_hidden_status = cert_status['status'] in ('unavailable', 'processing', 'generating', 'notpassing', 'auditing')
 
     if course_overview.certificates_display_behavior == 'early_no_info' and is_hidden_status:
-        return {}
+        return default_info
 
     status = template_state.get(cert_status['status'], default_status)
 
+    certificate_hidden = (
+        (status == 'generating' or status == 'downloadable') and
+        certificates_viewable_for_course(course_overview) and
+        course_overview.certificate_available_date
+    )
+
     status_dict = {
         'status': status,
-        'certificate_message_viewable': certificates_viewable_for_course(course_overview),
+        'certificate_hidden': certificate_hidden,
         'show_download_url': status == 'downloadable',
         'show_disabled_download_button': status == 'generating',
         'mode': cert_status.get('mode', None),
