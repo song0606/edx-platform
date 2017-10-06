@@ -24,6 +24,7 @@
 
     .authoring-org-logo {
       background-color:$white;
+      margin-bottom:20px;
     }
 
     .btn{
@@ -32,6 +33,26 @@
 
     .btn, .authoring-org-logo, h1, h2, a{
       margin-bottom: 20px;
+    }
+
+    #program_video{
+      display:flex;
+      align-items: center;
+      height:100%;
+      button{
+        background-color:rgba(0, 0, 0, 0)
+      }
+      iframe{
+        width: 100%;
+        max-width: 400px;
+        height: 100%;
+        max-height: 200px;
+      }
+      @media (max-width: 768px) {
+        iframe{
+          margin: 50px 0px;
+        }
+      }
     }
   }
   .quick-nav{
@@ -96,24 +117,32 @@
     h2{
       margin-bottom: 20px;
     }
-
-    .course-image{
-      img{
-        max-width: 100%;
-      }
-    }
-    .course-enroll{
+    .course{
       margin: 50px 0px;
 
-      div{
-        text-align: center;
-        font-weight: bold;
+      .course-image{
+        img{
+          max-width: 100%;
+        }
       }
+      .course-enroll{
+        margin-top: 50px;
+        div{
+          text-align: center;
+          font-weight: bold;
+        }
 
-      a{
-        font-size:20px;
+        a{
+          font-size:20px;
+        }
+      }
+      @media (min-width: 992px) {
+        .course-enroll{
+          margin-top: 0px;
+        }
       }
     }
+
   }
   #instructors{
     .instructor{
@@ -146,11 +175,5 @@
       font-weight: bold;
       margin-top:20px;
     }
-  }
-}
-
-@media (min-width: 992px) {
-  .course{
-    margin: 50px 0px;
   }
 }
