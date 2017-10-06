@@ -5,6 +5,8 @@ Utility library for working with the edx-organizations app
 from django.conf import settings
 from django.db.utils import DatabaseError
 
+import logging
+log = logging.getLogger("Loturco.logger")
 
 def add_organization(organization_data):
     """
@@ -83,8 +85,12 @@ def get_course_organizations(course_id):
     Client API operation adapter/wrapper
     """
     if not organizations_enabled():
+        log.info('theres no orgs enabled')
         return []
     from organizations import api as organizations_api
+    log.info('importing')
+    log.info('org_api is type: '+ str(type(organizations_api)))
+    log.info(str(organizations_api))
     return organizations_api.get_course_organizations(course_id)
 
 
@@ -92,7 +98,10 @@ def get_course_organization_id(course_id):
     """
     Returns organization id for course or None if the course is not linked to an org
     """
+    log.info('get course org id called')
     course_organization = get_course_organizations(course_id)
+    log.info('course organization is:')
+    log.info(course_organization)
     if course_organization:
         return course_organization[0]['id']
     return None

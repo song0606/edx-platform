@@ -470,11 +470,11 @@ def get_certificate_template(course_key, mode, language):
     """
     template = None
     # fetch organization of the course
-    org_id = get_course_organization_id(course_key)
+    org_id = 2#get_course_organization_id(course_key)
 
     # only consider active templates
     active_templates = CertificateTemplate.objects.filter(is_active=True)
-
+    log.info('org and mode are' + str(org_id) + str(mode))
     if org_id and mode:  # get template by org, mode, and key
         org_mode_and_key_templates = active_templates.filter(
             organization_id=org_id,
@@ -513,11 +513,14 @@ def get_language_specific_template_or_default(language, templates):
     Returns default templates If no language matches, or language passed is None
     """
     two_letter_language = _get_two_letter_language_code(language)
-    language_or_default_templates = list(templates.filter(Q(language=two_letter_language) | Q(language=None)))
-    language_specific_template = get_language_specific_template(language, language_or_default_templates)
+    log.info('THE TWO LETTER LANGUAGE CODE IS: '+ two_letter_language)
+    language_or_default_templates = list(templates.filter(Q(language=two_letter_language) | Q(language="")))
+    language_specific_template = get_language_specific_template(two_letter_language, language_or_default_templates)
     if language_specific_template:
+        log.info('returning lang specific template')
         return language_specific_template
     else:
+        log.info('NOT returning lang specific template')
         return language_or_default_templates[0] if language_or_default_templates else None
 
 

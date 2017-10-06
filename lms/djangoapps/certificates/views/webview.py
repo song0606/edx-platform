@@ -253,7 +253,7 @@ def _update_course_context(request, context, course, course_key, platform_name):
     if CertificateGenerationCourseSetting.is_language_specific_templates_enabled_for_course(course_key):
         fields = ['start', 'end', 'max_effort', 'content_language']
         course_run_data = get_course_run_details(course_key, fields)
-        if course_run_data['start'] and course_run_data['end'] and course_run_data['max_effort']:
+        if course_run_data.get('start') and course_run_data.get('end') and course_run_data.get('max_effort'):
             # Calculate duration of the course run in weeks, multiplied by max_effort for total Hours of Effort
             try:
                 start = parser.parse(course_run_data['start'])
@@ -262,7 +262,7 @@ def _update_course_context(request, context, course, course_key, platform_name):
                 context['hours_of_effort'] = ((end - start).days / 7) * max_effort
             except ValueError:
                 log.exception('Error occurred while parsing course run details')
-        context['content_language'] = course_run_data['content_language']
+        context['content_language'] = course_run_data.get('content_language')
 
 
 def _update_social_context(request, context, course, user, user_certificate, platform_name):
@@ -427,7 +427,9 @@ def _render_certificate_template(request, context, course, user_certificate):
     """
     Picks appropriate certificate templates and renders it.
     """
+    log.info('CUSTOM_CERTIFICATE_TEMPLATES_ENABLED: '+str(settings.FEATURES.get('CUSTOM_CERTIFICATE_TEMPLATES_ENABLED', False)))
     if settings.FEATURES.get('CUSTOM_CERTIFICATE_TEMPLATES_ENABLED', False):
+        log.info('content_language is '+ str(context.get('content_language')))
         custom_template = get_certificate_template(course.id, user_certificate.mode, context.get('content_language'))
         if custom_template:
             template = Template(
