@@ -355,10 +355,10 @@ def _cert_info(user, course_overview, cert_status, course_mode):  # pylint: disa
         return default_info
 
     status = template_state.get(cert_status['status'], default_status)
-
+                
     certificate_hidden = (
+        not certificates_viewable_for_course(course_overview) and
         (status == 'generating' or status == 'downloadable') and
-        certificates_viewable_for_course(course_overview) and
         course_overview.certificate_available_date
     )
 
