@@ -252,6 +252,10 @@ def _recurring_nudge_schedules_for_bin(site, target_day, bin_num, org_list, excl
             # This is used by the bulk email optout policy
             'course_ids': course_id_strs,
         })
+
+        # Information for including upsell messaging in template.
+        _add_upsell_button_to_email_template(user, first_schedule, template_context)
+
         yield (user, first_schedule.enrollment.course.language, template_context)
 
 
@@ -371,6 +375,8 @@ def get_schedules_with_target_date_by_bin_and_orgs(schedule_date_field, target_d
     schedules = Schedule.objects.select_related(
         'enrollment__user__profile',
         'enrollment__course',
+    ).prefetch_related(
+        'enrollment__course__modes'
     ).filter(
         enrollment__user__in=users,
         enrollment__is_active=True,
