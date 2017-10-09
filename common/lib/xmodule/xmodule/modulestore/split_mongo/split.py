@@ -497,7 +497,7 @@ class SplitBulkWriteMixin(BulkOperationsMixin):
             block_data.edit_info.original_usage = original_usage
             block_data.edit_info.original_usage_version = original_usage_version
 
-    def find_matching_course_indexes(self, branch=None, search_targets=None, org_target=None):
+    def find_matching_course_indexes(self, branch=None, search_targets=None, org_target=None, course_ids = None):
         """
         Find the course_indexes which have the specified branch and search_targets. An optional org_target
         can be specified to apply an ORG filter to return only the courses that are part of
@@ -506,7 +506,7 @@ class SplitBulkWriteMixin(BulkOperationsMixin):
         Returns:
             a Cursor if there are no changes in flight or a list if some have changed in current bulk op
         """
-        indexes = self.db_connection.find_matching_course_indexes(branch, search_targets, org_target)
+        indexes = self.db_connection.find_matching_course_indexes(branch, search_targets, org_target, course_ids=course_ids)
 
         def _replace_or_append_index(altered_index):
             """
@@ -913,7 +913,8 @@ class SplitMongoModuleStore(SplitBulkWriteMixin, ModuleStoreWriteBase):
         matching_indexes = self.find_matching_course_indexes(
             branch,
             search_targets=None,
-            org_target=kwargs.get('org')
+            org_target=kwargs.get('org'),
+            course_ids = kwargs.get('course_list')
         )
 
         # collect ids and then query for those

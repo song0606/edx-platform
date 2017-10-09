@@ -451,7 +451,7 @@ class MongoConnection(object):
                 }
             return self.course_index.find_one(query)
 
-    def find_matching_course_indexes(self, branch=None, search_targets=None, org_target=None, course_context=None):
+    def find_matching_course_indexes(self, branch=None, search_targets=None, org_target=None, course_context=None, course_ids=None):
         """
         Find the course_index matching particular conditions.
 
@@ -462,6 +462,9 @@ class MongoConnection(object):
             org_target: If specified, this is an ORG filter so that only course_indexs are
                 returned for the specified ORG
         """
+        if course_ids:
+            return [self.get_course_index(course_id) for course_id in course_ids]
+
         with TIMER.timer("find_matching_course_indexes", course_context):
             query = {}
             if branch is not None:

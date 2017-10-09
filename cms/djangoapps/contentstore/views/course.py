@@ -428,13 +428,17 @@ def _accessible_courses_list_from_groups(request):
     instructor_courses = UserBasedRole(request.user, CourseInstructorRole.ROLE).courses_with_role()
     staff_courses = UserBasedRole(request.user, CourseStaffRole.ROLE).courses_with_role()
     all_courses = filter(filter_ccx, instructor_courses | staff_courses)
-
     course_ids = [course_access.course_id for course_access in all_courses]
+    course_ids = list(set(course_ids))
 
     if None in course_ids:
         raise AccessListFallback
 
-    courses_list = CourseOverview.objects.filter(id__in=course_ids)
+    # TODO: what about using has_studio_read_access for filtering result of get_course_summaries
+
+    courses_list = modulestore().get_course_summaries(course_list=course_ids)
+    # courses_list = six.moves.filter(course_filter, courses_summary)
+    # courses_list = CourseOverview.objects.filter(id__in=course_ids)
 
     return courses_list, []
 
