@@ -9,12 +9,12 @@ class CourseEntitlement(models.Model):
     Represents a Student's Entitlement to a Course Run for a given Course.
     """
 
-    user_id = models.ForeignKey(User)
-    # TODO: Lookup the Course ID Implementation in
-    # the enrollment Model and elsewhere and immitate
+    user = models.ForeignKey(User)
     # TODO: Consider replacing with an integer Foreign key and a Course Table
     # The Course ID that is assigned to this Entitlement
-    root_course_id = models.CharField(max_length=255, primary_key=True)
+    root_course = models.CharField(max_length=255, primary_key=True)
+
+    created = models.DateTimeField(auto_now_add=True, null=True, db_index=True)
 
     # The date that an enrollment must be applied by
     enroll_end_date = models.DateTimeField(null=False)
@@ -26,7 +26,7 @@ class CourseEntitlement(models.Model):
 
     # The ID of the course enrollment for this Entitlement
     # if NULL the entitlement is not in use
-    enrollment_course_id = models.ForeignKey('student.CourseEnrollment', null=True)
+    enrollment_course = models.ForeignKey('student.CourseEnrollment', null=True)
 
     is_active = models.BooleanField(default=1)
 
