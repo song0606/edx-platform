@@ -97,16 +97,25 @@ class TestSendRecurringNudge(CacheIsolationTestCase):
         schedules = [
             ScheduleFactory.create(
                 start=datetime.datetime(2017, 8, 3, 18, 44, 30, tzinfo=pytz.UTC),
-                enrollment__user=UserFactory.create(),
+                enrollment__user=UserFactory.create(id=(i + 100)),
                 enrollment__course__id=CourseLocator('edX', 'toy', 'Bin')
-            ) for _ in range(schedule_count)
+            ) for i in range(schedule_count)
         ]
+
+        bins_in_use = frozenset((s.enrollment.user.id % tasks.RECURRING_NUDGE_NUM_BINS) for s in schedules)
 
         test_time = datetime.datetime(2017, 8, 3, 18, tzinfo=pytz.UTC)
         test_time_str = serialize(test_time)
         for b in range(tasks.RECURRING_NUDGE_NUM_BINS):
-            # waffle flag takes an extra query before it is cached
-            with self.assertNumQueries(3 if b == 0 else 2):
+            expected_queries = 2
+            if b == 0:
+                # waffle flag takes an extra query before it is cached in bin 0
+                expected_queries += 1
+            if b in bins_in_use:
+                # to fetch course modes for valid schedules
+                expected_queries += 1
+
+            with self.assertNumQueries(expected_queries):
                 tasks.recurring_nudge_schedule_bin(
                     self.site_config.site.id, target_day_str=test_time_str, day_offset=-3, bin_num=b,
                     org_list=[schedules[0].enrollment.course.org],
@@ -116,9 +125,10 @@ class TestSendRecurringNudge(CacheIsolationTestCase):
 
     @patch.object(tasks, '_recurring_nudge_schedule_send')
     def test_no_course_overview(self, mock_schedule_send):
-
+        user_id = 5
         schedule = ScheduleFactory.create(
             start=datetime.datetime(2017, 8, 3, 20, 34, 30, tzinfo=pytz.UTC),
+            enrollment__user=UserFactory.create(id=user_id),
         )
         schedule.enrollment.course_id = CourseKey.from_string('edX/toy/Not_2012_Fall')
         schedule.enrollment.save()
@@ -126,7 +136,7 @@ class TestSendRecurringNudge(CacheIsolationTestCase):
         test_time = datetime.datetime(2017, 8, 3, 20, tzinfo=pytz.UTC)
         test_time_str = serialize(test_time)
         for b in range(tasks.RECURRING_NUDGE_NUM_BINS):
-            # waffle flag takes an extra query before it is cached
+            # waffle flag takes an extra query before it is cached in bin 0
             with self.assertNumQueries(3 if b == 0 else 2):
                 tasks.recurring_nudge_schedule_bin(
                     self.site_config.site.id, target_day_str=test_time_str, day_offset=-3, bin_num=b,
@@ -199,7 +209,7 @@ class TestSendRecurringNudge(CacheIsolationTestCase):
 
         test_time = datetime.datetime(2017, 8, 3, 17, tzinfo=pytz.UTC)
         test_time_str = serialize(test_time)
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(4):
             tasks.recurring_nudge_schedule_bin(
                 limited_config.site.id, target_day_str=test_time_str, day_offset=-3, bin_num=0,
                 org_list=org_list, exclude_orgs=exclude_orgs,
@@ -223,7 +233,7 @@ class TestSendRecurringNudge(CacheIsolationTestCase):
 
         test_time = datetime.datetime(2017, 8, 3, 19, 44, 30, tzinfo=pytz.UTC)
         test_time_str = serialize(test_time)
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(4):
             tasks.recurring_nudge_schedule_bin(
                 self.site_config.site.id, target_day_str=test_time_str, day_offset=-3,
                 bin_num=user.id % tasks.RECURRING_NUDGE_NUM_BINS,
@@ -262,7 +272,7 @@ class TestSendRecurringNudge(CacheIsolationTestCase):
             with patch.object(tasks, '_recurring_nudge_schedule_send') as mock_schedule_send:
                 mock_schedule_send.apply_async = lambda args, *_a, **_kw: sent_messages.append(args)
 
-                with self.assertNumQueries(3):
+                with self.assertNumQueries(4):
                     tasks.recurring_nudge_schedule_bin(
                         self.site_config.site.id, target_day_str=test_time_str, day_offset=day,
                         bin_num=self._calculate_bin_for_user(user), org_list=[schedules[0].enrollment.course.org],

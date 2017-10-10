@@ -12,13 +12,16 @@ from django.core.urlresolvers import reverse
 from django.db.models import F, Min
 from django.db.utils import DatabaseError
 from django.utils.formats import dateformat, get_format
+import pytz
 
 from edx_ace import ace
 from edx_ace.message import Message
 from edx_ace.recipient import Recipient
 from edx_ace.utils.date import deserialize
 from opaque_keys.edx.keys import CourseKey
-from lms.djangoapps.experiments.utils import check_and_get_upgrade_link_and_date
+
+from course_modes.models import CourseMode
+from courseware.date_summary import verified_upgrade_deadline_link
 
 from edxmako.shortcuts import marketing_link
 from openedx.core.djangoapps.schedules.message_type import ScheduleMessageType
@@ -178,22 +181,34 @@ def _gather_users_and_schedules_for_target_hour(target_hour, org_list, exclude_o
     return users, schedules
 
 
-def _add_upsell_button_to_email_template(a_user, a_schedule, template_context):
-    # Check and upgrade link performs a query on CourseMode, which is triggering failures in
-    # test_send_recurring_nudge.py
-    upgrade_link, upgrade_date = check_and_get_upgrade_link_and_date(a_user, a_schedule.enrollment)
-    has_dynamic_deadline = a_schedule.upgrade_deadline is not None
-    has_upgrade_link = upgrade_link is not None
-    show_upsell = has_dynamic_deadline and has_upgrade_link
+def _add_upsell_button_to_email_template(user, schedule, template_context):
+    enrollment = schedule.enrollment
+    course = enrollment.course
+
+    upgrade_deadline = schedule.enrollment.dynamic_upgrade_deadline
+
+    show_upsell = (
+        user.is_authenticated()
+        and enrollment.is_active
+        and CourseMode.is_mode_upgradeable(enrollment.mode)
+        and upgrade_deadline is not None
+        and datetime.datetime.now(pytz.UTC) < upgrade_deadline
+    )
+
+    upgrade_link = None
+    if show_upsell:
+        upgrade_link = verified_upgrade_deadline_link(user, course)
+
+    show_upsell = show_upsell and upgrade_link is not None
 
     template_context['show_upsell'] = show_upsell
     if show_upsell:
         template_context['upsell_link'] = upgrade_link
         template_context['user_schedule_upgrade_deadline_time'] = dateformat.format(
-            upgrade_date,
+            upgrade_deadline,
             get_format(
                 'DATE_FORMAT',
-                lang=a_schedule.enrollment.course.language,
+                lang=course.language,
                 use_l10n=True
             )
         )
