@@ -25,6 +25,22 @@ from openedx.core.djangolib.testing.utils import CacheIsolationTestCase, skip_un
 from student.tests.factories import UserFactory
 
 
+# 1) Load the current django site
+# 2) Query the schedules to find all of the template context information
+NUM_QUERIES_NO_MATCHING_SCHEDULES = 2
+
+# 3) Query all course modes for all courses in returned schedules
+NUM_QUERIES_WITH_MATCHES = NUM_QUERIES_NO_MATCHING_SCHEDULES + 1
+
+# 4) Also check the waffle flag
+NUM_QUERIES_WITH_MATCHES_AND_WAFFLE = NUM_QUERIES_WITH_MATCHES + 1
+
+# 1) Course-specific dynamic deadline opt-out
+# 2) Global dynamic deadline switch
+# 3) E-commerce configuration
+NUM_QUERIES_PER_MESSAGE = 3
+
+
 @ddt.ddt
 @skip_unless_lms
 @skipUnless('openedx.core.djangoapps.schedules.apps.SchedulesConfig' in settings.INSTALLED_APPS,
@@ -116,8 +132,11 @@ class TestUpgradeReminder(CacheIsolationTestCase):
         test_time = datetime.datetime(2017, 8, 3, 20, tzinfo=pytz.UTC)
         test_time_str = serialize(test_time)
         for b in range(tasks.UPGRADE_REMINDER_NUM_BINS):
-            # waffle flag takes an extra query before it is cached
-            with self.assertNumQueries(3 if b == 0 else 2):
+            expected_queries = 2
+            if b == 0:
+                # waffle flag takes an extra query before it is cached in bin 0
+                expected_queries += 1
+            with self.assertNumQueries(expected_queries):
                 tasks.upgrade_reminder_schedule_bin(
                     self.site_config.site.id, target_day_str=test_time_str, day_offset=2, bin_num=b,
                     org_list=[schedule.enrollment.course.org],
@@ -189,7 +208,7 @@ class TestUpgradeReminder(CacheIsolationTestCase):
 
         test_time = datetime.datetime(2017, 8, 3, 17, tzinfo=pytz.UTC)
         test_time_str = serialize(test_time)
-        with self.assertNumQueries(4):
+        with self.assertNumQueries(NUM_QUERIES_WITH_MATCHES_AND_WAFFLE):
             tasks.upgrade_reminder_schedule_bin(
                 limited_config.site.id, target_day_str=test_time_str, day_offset=2, bin_num=0,
                 org_list=org_list, exclude_orgs=exclude_orgs,
@@ -213,7 +232,7 @@ class TestUpgradeReminder(CacheIsolationTestCase):
 
         test_time = datetime.datetime(2017, 8, 3, 19, 44, 30, tzinfo=pytz.UTC)
         test_time_str = serialize(test_time)
-        with self.assertNumQueries(4):
+        with self.assertNumQueries(NUM_QUERIES_WITH_MATCHES_AND_WAFFLE):
             tasks.upgrade_reminder_schedule_bin(
                 self.site_config.site.id, target_day_str=test_time_str, day_offset=2,
                 bin_num=user.id % tasks.UPGRADE_REMINDER_NUM_BINS,
@@ -267,7 +286,8 @@ class TestUpgradeReminder(CacheIsolationTestCase):
             with patch.object(tasks, '_upgrade_reminder_schedule_send') as mock_schedule_send:
                 mock_schedule_send.apply_async = lambda args, *_a, **_kw: sent_messages.append(args)
 
-                with self.assertNumQueries(4 + (message_count * 3)):
+                num_expected_queries = NUM_QUERIES_WITH_MATCHES_AND_WAFFLE + (message_count * NUM_QUERIES_PER_MESSAGE)
+                with self.assertNumQueries(num_expected_queries):
                     tasks.upgrade_reminder_schedule_bin(
                         self.site_config.site.id, target_day_str=test_time_str, day_offset=day,
                         bin_num=user.id % tasks.UPGRADE_REMINDER_NUM_BINS,
