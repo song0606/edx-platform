@@ -186,11 +186,13 @@ def _add_upsell_button_to_email_template(user, schedule, template_context):
     course = enrollment.course
 
     upgrade_deadline = schedule.enrollment.dynamic_upgrade_deadline
+    course_modes_dict = CourseMode.modes_for_course_dict(course.id, modes=course.modes.all())
 
     show_upsell = (
         user.is_authenticated()
         and enrollment.is_active
         and CourseMode.is_mode_upgradeable(enrollment.mode)
+        and CourseMode.has_verified_mode(course_modes_dict)
         and upgrade_deadline is not None
         and datetime.datetime.now(pytz.UTC) < upgrade_deadline
     )

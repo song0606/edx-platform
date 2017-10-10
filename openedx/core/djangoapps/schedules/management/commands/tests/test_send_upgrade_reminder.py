@@ -14,6 +14,8 @@ from mock import Mock, patch
 from opaque_keys.edx.keys import CourseKey
 from opaque_keys.edx.locator import CourseLocator
 
+from course_modes.models import CourseMode
+from course_modes.tests.factories import CourseModeFactory
 from courseware.models import DynamicUpgradeDeadlineConfiguration
 from openedx.core.djangoapps.schedules import resolvers, tasks
 from openedx.core.djangoapps.schedules.management.commands import send_upgrade_reminder as reminder
@@ -40,8 +42,6 @@ class TestUpgradeReminder(CacheIsolationTestCase):
         site = SiteFactory.create()
         self.site_config = SiteConfigurationFactory.create(site=site)
         ScheduleConfigFactory.create(site=self.site_config.site)
-
-        DynamicUpgradeDeadlineConfiguration.objects.create(enabled=True)
 
     @patch.object(reminder.Command, 'resolver_class')
     def test_handle(self, mock_resolver):
@@ -225,8 +225,9 @@ class TestUpgradeReminder(CacheIsolationTestCase):
     @ddt.data(*itertools.product((1, 10, 100), (2, 10)))
     @ddt.unpack
     def test_templates(self, message_count, day):
+        DynamicUpgradeDeadlineConfiguration.objects.create(enabled=True)
         now = datetime.datetime.now(pytz.UTC)
-        future_date = now + datetime.timedelta(days=10)
+        future_date = now + datetime.timedelta(days=21)
 
         user = UserFactory.create()
         schedules = [
@@ -241,6 +242,12 @@ class TestUpgradeReminder(CacheIsolationTestCase):
         for schedule in schedules:
             schedule.enrollment.course.self_paced = True
             schedule.enrollment.course.save()
+
+            CourseModeFactory(
+                course_id=schedule.enrollment.course.id,
+                mode_slug=CourseMode.VERIFIED,
+                expiration_datetime=future_date
+            )
 
         test_time = future_date
         test_time_str = serialize(test_time)

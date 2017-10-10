@@ -17,6 +17,7 @@ from opaque_keys.edx.locator import CourseLocator
 
 from course_modes.models import CourseMode
 from course_modes.tests.factories import CourseModeFactory
+from courseware.models import DynamicUpgradeDeadlineConfiguration
 from openedx.core.djangoapps.schedules import resolvers, tasks
 from openedx.core.djangoapps.schedules.management.commands import send_recurring_nudge as nudge
 from openedx.core.djangoapps.schedules.tests.factories import ScheduleConfigFactory, ScheduleFactory
@@ -63,6 +64,8 @@ class TestSendRecurringNudge(CacheIsolationTestCase):
         site = SiteFactory.create()
         self.site_config = SiteConfigurationFactory.create(site=site)
         ScheduleConfigFactory.create(site=self.site_config.site)
+
+        DynamicUpgradeDeadlineConfiguration.objects.create(enabled=True)
 
     @patch.object(nudge.Command, 'resolver_class')
     def test_handle(self, mock_resolver):
@@ -293,15 +296,17 @@ class TestSendRecurringNudge(CacheIsolationTestCase):
         user = UserFactory.create()
         course_id = CourseLocator('edX', 'toy', 'Course1')
         
-        first_day_of_schedule = datetime.datetime(2017, 8, 3, 19, 44, 30, tzinfo=pytz.UTC)
-        verification_deadline = datetime.datetime(2018, 8, 3, tzinfo=pytz.UTC)
-        target_hour = datetime.datetime(2017, 8, 3, 19, tzinfo=pytz.UTC)
+        first_day_of_schedule = datetime.datetime.now(pytz.UTC)
+        verification_deadline = first_day_of_schedule + datetime.timedelta(days=21)
+        target_hour = first_day_of_schedule
         target_hour_as_string = serialize(target_hour)
         nudge_day = 3
         
         schedule = ScheduleFactory.create(start=first_day_of_schedule,
                                           enrollment__user=user,
                                           enrollment__course__id=course_id)
+        schedule.enrollment.course.self_paced = True
+        schedule.enrollment.course.save()
 
         CourseModeFactory(
             course_id=course_id,
@@ -329,14 +334,16 @@ class TestSendRecurringNudge(CacheIsolationTestCase):
         user = UserFactory.create()
         course_id = CourseLocator('edX', 'toy', 'Course1')
 
-        first_day_of_schedule = datetime.datetime(2017, 8, 3, 19, 44, 30, tzinfo=pytz.UTC)
-        target_hour = datetime.datetime(2017, 8, 3, 19, tzinfo=pytz.UTC)
+        first_day_of_schedule = datetime.datetime.now(pytz.UTC)
+        target_hour = first_day_of_schedule
         target_hour_as_string = serialize(target_hour)
         nudge_day = 3
 
         schedule = ScheduleFactory.create(start=first_day_of_schedule,
                                           enrollment__user=user,
                                           enrollment__course__id=course_id)
+        schedule.enrollment.course.self_paced = True
+        schedule.enrollment.course.save()
 
         bin_task_parameters = [
             target_hour_as_string,
