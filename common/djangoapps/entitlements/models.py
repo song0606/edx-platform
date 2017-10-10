@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 from course_modes.models import CourseMode
-from opaque_keys.edx.keys import CourseKey
 
 
 class CourseEntitlement(models.Model):
@@ -10,8 +9,7 @@ class CourseEntitlement(models.Model):
     """
 
     user = models.ForeignKey(User)
-    # TODO: Consider replacing with an integer Foreign key and a Course Table
-    # The Course ID that is assigned to this Entitlement
+
     root_course = models.CharField(max_length=255, primary_key=True)
 
     created = models.DateTimeField(auto_now_add=True, null=True, db_index=True)
@@ -20,8 +18,6 @@ class CourseEntitlement(models.Model):
     enroll_end_date = models.DateTimeField(null=False)
 
     # The mode of the Course that will be applied
-    # TODO: When storing the Mode in the API should we check that it is an available mode
-    # for the Course?
     mode = models.CharField(default=CourseMode.DEFAULT_MODE_SLUG, max_length=100)
 
     # The ID of the course enrollment for this Entitlement
@@ -30,33 +26,86 @@ class CourseEntitlement(models.Model):
 
     is_active = models.BooleanField(default=1)
 
-    # TODO: Commented out until needed in implementation
-    # @classmethod
-    # def entitlements_for_username(cls, username):
-    #     user = User.objects.get(username=username)
-    #     return cls.objects.filter(user_id=user)
-    #
-    # @classmethod
-    # def entitlements_for_user(cls, user):
-    #     return cls.objects.filter(user_id=user)
-    #
-    # @classmethod
-    # def get_user_course_entitlement(cls, user, course):
-    #     # TODO: Implement check to see if the Course ID is valid
-    #     return cls.objects.filter(user_id=user, root_course_id=course).first()
-    #
-    # @classmethod
-    # def set_entitlement_enrollment(cls, user, course_key, course_enrollment):
-    #     course = course_key.org + '+' + course_key.course
-    #     return cls.objects.filter(
-    #         user_id=user,
-    #         root_course_id=course
-    #     ).update(enrollment_course_id=course_enrollment)
-    #
-    # @classmethod
-    # def remove_entitlement_enrollment(cls, user, course_key):
-    #     course = course_key.org + '+' + course_key.course
-    #     return cls.objects.filter(
-    #         user_id=user,
-    #         root_course_id=course
-    #     ).update(enrollment_course_id=None)
+    @classmethod
+    def entitlements_for_user(cls, user):
+        """
+        Retrieve all the Entitlements for a User
+
+        Arguments:
+            user: A Django User object identifying the current user
+
+        Returns:
+            All of the Entitlements for the User
+        """
+        return cls.objects.filter(user=user)
+
+    @classmethod
+    def get_user_course_entitlement(cls, user, parent_course_id):
+        """
+        Retrieve The entitlement for the given parent course id if it exists for the User
+
+        Arguments:
+            user: A Django User object identifying the current user
+            parent_course_id(string): The parent course id string
+
+        Returns:
+            The single entitlement for the requested parent course id
+        """
+        return cls.objects.filter(user=user, root_course=parent_course_id).first()
+
+    @classmethod
+    def update_or_create_new_entitlement(cls, user, parent_course_id, entitlement_data):
+        """
+        Updates or creates a new Course Entitlement
+
+        Arguments:
+            user: A Django User object identifying the current user
+            parent_course_id(string): The parent course id string\
+            entitlement_data(dict): The dictionary containing all the data for the entitlement
+                e.g. entitlement_data = {
+                        'user': user,
+                        'root_course': parent_course_id,
+                        'enroll_end_date': '2017-09-14 11:47:58.000000',
+                        'mode': 'verified',
+                        'is_active': True
+                    }
+
+        Returns:
+            stored_entitlement: The new or updated CourseEntitlement object
+            is_created (bool): Boolean representing whether or not the Entitlement was created or updated
+        """
+        stored_entitlement, is_created = cls.objects.update_or_create(
+            user=user,
+            root_course=parent_course_id,
+            defaults=entitlement_data
+        )
+        return stored_entitlement, is_created
+
+    @classmethod
+    def set_entitlement_enrollment(cls, user, parent_course_id, course_run_enrollment):
+        """
+        Sets the enrollment course for a given entitlement
+
+        Arguments:
+            user: A Django User object identifying the current user
+            parent_course_id(string): The parent course id string\
+            course_run_enrollment (CourseEnrollment): The CourseEnrollment object to store
+        """
+        return cls.objects.filter(
+            user=user,
+            root_course=parent_course_id
+        ).update(enrollment_course_id=course_run_enrollment)
+
+    @classmethod
+    def remove_entitlement_enrollment(cls, user, parent_course_id):
+        """
+        Removes the enrollment course for a given entitlement
+
+        Arguments:
+            user: A Django User object identifying the current user
+            parent_course_id(string): The parent course id string\
+        """
+        return cls.objects.filter(
+            user=user,
+            root_course=parent_course_id
+        ).update(enrollment_course_id=None)
