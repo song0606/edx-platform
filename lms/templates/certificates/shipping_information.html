@@ -16,10 +16,21 @@ function editMode(){
     line-height: 25px;
 }
 
+#shipping_form {
+    margin: 25px;
+}
+
 label {
     display: block;
     float: left;
     width: 100px;
+    font-style: normal;
+    font-weight: bold;
+    cursor: default;
+}
+
+.clearfix {
+    margin-bottom: 10px;
 }
 </style>
 
@@ -27,7 +38,7 @@ label {
         Course Certificate Shipping Information
     </h1>
 
-    <div>
+    <div id="shipping_form">
         <form method="POST">
             <input type="hidden" id="csrf_token" name="csrfmiddlewaretoken" value="${csrf_token}">
             <label style="">First Name</label>
