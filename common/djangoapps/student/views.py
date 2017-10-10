@@ -313,21 +313,29 @@ def get_course_enrollments(user, org_whitelist, org_blacklist):
             yield enrollment
 
 
-def get_site_course_enrollments(user):
+def get_org_black_and_whitelist_for_site(user):
     """
-    Returns a user's enrollments filtered by the orgs of the current site.
+    Returns the org blacklist and whitelist for the current site.
+
+    Returns:
+        (org_whitelist, org_blacklist): A tuple of lists of orgs that serve as
+            either a blacklist or a whitelist of orgs for the current site. The
+            whitelist takes precedence, and the blacklist is used if the
+            whitelist is None.
     """
     # Default blacklist is empty.
     org_blacklist = None
-    # Whitelist the orgs configured for the current site.
+    # Whitelist the orgs configured for the current site.  Each site outside
+    # of edx.org has a list of orgs associated with its configuration.
     org_whitelist = configuration_helpers.get_current_site_orgs()
 
     if not org_whitelist:
         # If there is no whitelist, the blacklist will include all orgs that
-        # have been configured for any other sites.
+        # have been configured for any other sites. This applies to edx.org,
+        # where it is easier to blacklist all other orgs.
         org_blacklist = configuration_helpers.get_all_orgs()
 
-    return list(get_course_enrollments(user, org_whitelist, org_blacklist))
+    return (org_whitelist, org_blacklist)
 
 
 def _cert_info(user, course_overview, cert_status, course_mode):  # pylint: disable=unused-argument
@@ -663,7 +671,9 @@ def dashboard(request):
         'ACTIVATION_EMAIL_SUPPORT_LINK', settings.ACTIVATION_EMAIL_SUPPORT_LINK
     ) or settings.SUPPORT_SITE_LINK
 
-    course_enrollments = get_site_course_enrollments(user)
+    # get the org whitelist or the org blacklist for the current site
+    site_org_whitelist, site_org_blacklist = get_org_black_and_whitelist_for_site(user)
+    course_enrollments = list(get_course_enrollments(user, site_org_whitelist, site_org_blacklist))
 
     # Record how many courses there are so that we can get a better
     # understanding of usage patterns on prod.
@@ -810,7 +820,7 @@ def dashboard(request):
     denied_banner = any(item.display for item in reverifications["denied"])
 
     # Populate the Order History for the side-bar.
-    order_history_list = order_history(user, course_org_filter=course_org_filter, org_filter_out_set=org_filter_out_set)
+    order_history_list = order_history(user, course_org_filter=site_org_whitelist, org_filter_out_set=site_org_blacklist)
 
     # get list of courses having pre-requisites yet to be completed
     courses_having_prerequisites = frozenset(
