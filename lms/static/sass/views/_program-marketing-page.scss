@@ -1,179 +1,191 @@
-#program-details-page{
+#program-details-page {
   font-size: 16px;
 
-  h1{
+  .program_title {
     font-weight: bold;
   }
-  .logo{
-    height:100px;
+
+  .logo {
+    height: 100px;
   }
 
-  h3{
-    margin-bottom:20px;
+  .section_title {
+    margin-bottom: $baseline;
     color: theme-color("dark");
   }
-  hr{
-    height:4px;
-    border:0;
-    background-color:theme-color('secondary');
+
+  .thick_rule {
+    height: 4px;
+    border: 0;
+    background-color: theme-color('secondary');
   }
 
-  .main-banner{
-    color:white;
-    margin-bottom:1px;
+  .main-banner {
+    color: white;
+    margin-bottom: 1px;
 
     .authoring-org-logo {
-      background-color:$white;
-      margin-bottom:20px;
+      background-color: $white;
+      margin-bottom: $baseline;
     }
 
-    .btn{
-      font-size:20px;
+    .btn {
+      font-size: 20px;
     }
 
-    .btn, .authoring-org-logo, h1, h2, a{
-      margin-bottom: 20px;
+    .btn,
+    .authoring-org-logo,
+    h1,
+    h2,
+    a {
+      margin-bottom: $baseline;
     }
 
-    #program_video{
-      display:flex;
+    #program_video {
+      display: flex;
       align-items: center;
-      height:100%;
-      button{
-        background-color:rgba(0, 0, 0, 0)
+      height: 100%;
+
+      button {
+        background-color: rgba(0, 0, 0, 0);
       }
-      iframe{
+
+      iframe {
         width: 100%;
         max-width: 400px;
         height: 100%;
         max-height: 200px;
       }
-      @media (max-width: 768px) {
-        iframe{
-          margin: 50px 0px;
+
+      @include media-breakpoint-down(md) {
+        iframe {
+          margin: 50px 0;
         }
       }
     }
   }
-  .quick-nav{
-    background-color: theme-color('light');
-    margin-bottom:10px;
 
-    .nav-item{
-      font-size:18px;
-      color:$white;
+  .quick-nav {
+    background-color: theme-color('light');
+    margin-bottom: 10px;
+
+    .nav-item {
+      font-size: 18px;
+      color: $white;
     }
   }
-  .program-info{
 
-    .quote{
+  .program-info {
+    .quote {
       font-style: italic;
     }
 
-    .section{
-      margin-bottom:20px;
+    .section {
+      margin-bottom: $baseline;
     }
 
-    .facts{
+    .facts {
       border: 1px solid theme-color('dark');
 
-      li{
-        margin: 0 20px;
-        padding: 15px 0px;
+      li {
+        margin: 0 $baseline;
+        padding: 15px 0;
         border-bottom: 1px solid theme-color('light');
 
-        .label{
-          display:inline-block;
-          width:48%;
-          color:theme-color('dark');
+        .label {
+          color: theme-color('dark');
         }
 
-        .description{
-          display:inline-block;
-          width:50%;
-
-          .original-price{
+        .description {
+          .original-price {
             text-decoration: line-through;
           }
-          
-          .green-highlight{
-            font-size:18px;
-            color:theme-color('success');
+
+          .green-highlight {
+            font-size: 18px;
+            color: theme-color('success');
             font-weight: bold;
           }
         }
 
-        .label, .description{
-          vertical-align:top;
+        .label,
+        .description {
+          vertical-align: top;
         }
-        
-        &:last-child{
+
+        &:last-child {
           border-bottom: 0;
         }
       }
     }
   }
-  #courses{
-    h2{
-      margin-bottom: 20px;
-    }
-    .course{
-      margin: 50px 0px;
 
-      .course-image{
-        img{
+  #courses {
+    h2 {
+      margin-bottom: $baseline;
+    }
+
+    .course {
+      margin: 50px 0;
+
+      .course-image {
+        img {
           max-width: 100%;
         }
       }
-      .course-enroll{
+
+      .course-enroll {
         margin-top: 50px;
-        div{
+
+        div {
           text-align: center;
           font-weight: bold;
         }
 
-        a{
-          font-size:20px;
+        a {
+          font-size: 20px;
         }
       }
-      @media (min-width: 992px) {
-        .course-enroll{
-          margin-top: 0px;
+
+      @include media-breakpoint-up(lg) {
+        .course-enroll {
+          margin-top: 0;
         }
       }
     }
-
   }
-  #instructors{
-    .instructor{
-      margin:20px 0px;
 
-      *{
+  #instructors {
+    .instructor {
+      margin: $baseline 0;
+
+      * {
         text-align: center;
-        margin:auto;
+        margin: auto;
       }
 
-      img{
-        height:100px;
-        width:100px;
-        border-radius:100px;
+      img {
+        height: 100px;
+        width: 100px;
+        border-radius: 100px;
       }
 
-      .instructor-name{
+      .instructor-name {
         font-weight: bold;
       }
 
-      .instructor-position{
+      .instructor-position {
         font-weight: bold;
       }
     }
   }
-  #faqs{
-    margin-bottom:40px;
 
-    .question{
+  .faqs {
+    margin-bottom: 40px;
+
+    .question {
       font-weight: bold;
-      margin-top:20px;
+      margin-top: $baseline;
     }
   }
 }
