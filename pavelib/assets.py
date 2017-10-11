@@ -43,8 +43,8 @@ SYSTEMS = {
 COMMON_LOOKUP_PATHS = [
     path("common/static"),
     path("common/static/sass"),
+    path('node_modules/@edx'),
     path('node_modules'),
-    path('node_modules/edx-pattern-library/node_modules'),
 ]
 
 # A list of NPM installed libraries that should be copied into the common
@@ -596,6 +596,26 @@ def _compile_sass(system, theme, debug, force, timing_info):
                 source_comments=source_comments,
                 output_style=output_style,
             )
+
+            # Post-process CSS files that have no RTL equivalent to add RTL rules
+            for css_file in glob.glob(css_dir + '/**/*.css'):
+                if 'bootstrap' in css_file:
+                    # Rename the CSS file to be a .raw file
+                    raw_css_file = css_file + '.raw'
+                    sh("mv {source_file} {target_file}".format(
+                        source_file=css_file,
+                        target_file=raw_css_file,
+                    ))
+
+                    # Process the .raw file to generate the CSS file
+                    sh("postcss {source_file} --output {target_file}".format(
+                        source_file=raw_css_file,
+                        target_file=css_file,
+                    ))
+
+                    # Remove the raw file
+                    os.remove(raw_css_file)
+
             duration = datetime.now() - start
             timing_info.append((sass_source_dir, css_dir, duration))
     return True
