@@ -390,14 +390,13 @@ def _accessible_courses_summary_iter(request, org=None):
 def _accessible_courses_iter(request):
     """
     List all courses available to the logged in user by iterating through all the courses.
+    CourseSummary objects are used for lisitng purposes.
     This method is only used by tests.
     """
     def course_filter(course):
         """
         Filter out unusable and inaccessible courses
         """
-        if isinstance(course, ErrorDescriptor):
-            return False
 
         # Custom Courses for edX (CCX) is an edX feature for re-using course content.
         # CCXs cannot be edited in Studio (aka cms) and should not be shown in this dashboard.
@@ -411,7 +410,7 @@ def _accessible_courses_iter(request):
 
         return has_studio_read_access(request.user, course.id)
 
-    courses = six.moves.filter(course_filter, modulestore().get_courses())
+    courses = six.moves.filter(course_filter, modulestore().get_course_summaries())
 
     in_process_course_actions = get_in_process_course_actions(request)
     return courses, in_process_course_actions
@@ -434,11 +433,7 @@ def _accessible_courses_list_from_groups(request):
     if None in course_ids:
         raise AccessListFallback
 
-    # TODO: what about using has_studio_read_access for filtering result of get_course_summaries
-
-    courses_list = modulestore().get_course_summaries(course_list=course_ids)
-    # courses_list = six.moves.filter(course_filter, courses_summary)
-    # courses_list = CourseOverview.objects.filter(id__in=course_ids)
+    courses_list = modulestore().get_course_summaries(course_keys=course_ids)
 
     return courses_list, []
 

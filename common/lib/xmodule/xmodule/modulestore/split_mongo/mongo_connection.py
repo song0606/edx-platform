@@ -434,11 +434,14 @@ class MongoConnection(object):
             tagger.measure("blocks", len(structure["blocks"]))
             self.structures.insert(structure_to_mongo(structure, course_context))
 
-    def get_course_index(self, key, ignore_case=False):
+    def get_course_index(self, key, ignore_case=False, branch=None):
         """
         Get the course_index from the persistence mechanism whose id is the given key
         """
+        query = {}
         with TIMER.timer("get_course_index", key):
+            if branch:
+                query['versions.{}'.format(branch)] = {'$exists': True}
             if ignore_case:
                 query = {
                     key_attr: re.compile(u'^{}$'.format(re.escape(getattr(key, key_attr))), re.IGNORECASE)
@@ -451,7 +454,7 @@ class MongoConnection(object):
                 }
             return self.course_index.find_one(query)
 
-    def find_matching_course_indexes(self, branch=None, search_targets=None, org_target=None, course_context=None, course_ids=None):
+    def find_matching_course_indexes(self, branch=None, search_targets=None, org_target=None, course_context=None):
         """
         Find the course_index matching particular conditions.
 
@@ -462,9 +465,6 @@ class MongoConnection(object):
             org_target: If specified, this is an ORG filter so that only course_indexs are
                 returned for the specified ORG
         """
-        if course_ids:
-            return [self.get_course_index(course_id) for course_id in course_ids]
-
         with TIMER.timer("find_matching_course_indexes", course_context):
             query = {}
             if branch is not None:
