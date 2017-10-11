@@ -533,7 +533,7 @@ class SplitBulkWriteMixin(BulkOperationsMixin):
                 if all(existing[attr] == altered_index[attr] for attr in ['org', 'course', 'run']):
                     course_indexes[index] = altered_index
                     return
-                course_indexes.append(altered_index)
+            course_indexes.append(altered_index)
 
         for _, record in self._active_records:
             if branch and branch not in record.index.get('versions', {}):

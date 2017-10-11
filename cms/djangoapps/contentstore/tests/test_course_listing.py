@@ -16,7 +16,7 @@ from contentstore.tests.utils import AjaxEnabledTestClient
 from contentstore.utils import delete_course
 from contentstore.views.course import (
     AccessListFallback,
-    _accessible_courses_iter,
+    _accessible_courses_iter_for_tests,
     _accessible_courses_list_from_groups,
     _accessible_courses_summary_iter,
     get_courses_accessible_to_user
@@ -103,7 +103,7 @@ class TestCourseListing(ModuleStoreTestCase):
         self._create_course_with_access_groups(course_location, self.user)
 
         # get courses through iterating all courses
-        courses_iter, __ = _accessible_courses_iter(self.request)
+        courses_iter, __ = _accessible_courses_iter_for_tests(self.request)
         courses_list = list(courses_iter)
         self.assertEqual(len(courses_list), 1)
 
@@ -156,7 +156,7 @@ class TestCourseListing(ModuleStoreTestCase):
         # Verify that CCX courses are filtered out while iterating over all courses
         mocked_ccx_course = Mock(id=ccx_course_key)
         with patch('xmodule.modulestore.mixed.MixedModuleStore.get_course_summaries', return_value=[mocked_ccx_course]):
-            courses_iter, __ = _accessible_courses_iter(self.request)
+            courses_iter, __ = _accessible_courses_iter_for_tests(self.request)
             self.assertEqual(len(list(courses_iter)), 0)
 
     @ddt.data(
@@ -201,7 +201,7 @@ class TestCourseListing(ModuleStoreTestCase):
             self._create_course_with_access_groups(course_key, self.user, store)
 
         # get courses through iterating all courses
-        courses_iter, __ = _accessible_courses_iter(self.request)
+        courses_iter, __ = _accessible_courses_iter_for_tests(self.request)
         courses_list = list(courses_iter)
         self.assertEqual(len(courses_list), 1)
 
@@ -230,7 +230,7 @@ class TestCourseListing(ModuleStoreTestCase):
         CourseInstructorRole(course_key).add_users(self.user)
 
         # Get courses through iterating all courses
-        courses_iter, __ = _accessible_courses_iter(self.request)
+        courses_iter, __ = _accessible_courses_iter_for_tests(self.request)
 
         # Get course summaries by iterating all courses
         courses_summary_iter, __ = _accessible_courses_summary_iter(self.request)
@@ -272,12 +272,12 @@ class TestCourseListing(ModuleStoreTestCase):
 
         # time the get courses by iterating through all courses
         with Timer() as iteration_over_courses_time_1:
-            courses_iter, __ = _accessible_courses_iter(self.request)
+            courses_iter, __ = _accessible_courses_iter_for_tests(self.request)
         self.assertEqual(len(list(courses_iter)), USER_COURSES_COUNT)
 
         # time again the get courses by iterating through all courses
         with Timer() as iteration_over_courses_time_2:
-            courses_iter, __ = _accessible_courses_iter(self.request)
+            courses_iter, __ = _accessible_courses_iter_for_tests(self.request)
         self.assertEqual(len(list(courses_iter)), USER_COURSES_COUNT)
 
         # time the get courses by reversing django groups
@@ -296,7 +296,7 @@ class TestCourseListing(ModuleStoreTestCase):
         self.assertGreaterEqual(iteration_over_courses_time_1.elapsed, iteration_over_groups_time_1.elapsed)
         self.assertGreaterEqual(iteration_over_courses_time_2.elapsed, iteration_over_groups_time_2.elapsed)
 
-        # TODO: both methods _accessible_courses_list_from_groups and _accessible_courses_iter
+        # TODO: both methods _accessible_courses_list_from_groups and _accessible_courses_iter_for_tests
         # call get_course_summaries.
 
         # Now count the db queries
@@ -304,7 +304,7 @@ class TestCourseListing(ModuleStoreTestCase):
             _accessible_courses_list_from_groups(self.request)
 
         with check_mongo_calls(courses_list_calls):
-            list(_accessible_courses_iter(self.request))
+            list(_accessible_courses_iter_for_tests(self.request))
         # Calls:
         #    1) query old mongo
         #    2) get_more on old mongo
@@ -385,7 +385,7 @@ class TestCourseListing(ModuleStoreTestCase):
             )
 
         # verify return values
-        # for method in (_accessible_courses_list_from_groups, _accessible_courses_iter):
+        # for method in (_accessible_courses_list_from_groups, _accessible_courses_iter_for_tests):
 
         # method _accessible_courses_list_from_groups is only called for non-global staff users,
         # such users are not able to create rerun so no need for  unsucceeded course actions
@@ -394,7 +394,7 @@ class TestCourseListing(ModuleStoreTestCase):
             """Returns a python set of course keys by accessing the key with the given attribute name."""
             return set(getattr(c, key_attribute_name) for c in course_list)
 
-        found_courses, unsucceeded_course_actions = _accessible_courses_iter(self.request)
+        found_courses, unsucceeded_course_actions = _accessible_courses_iter_for_tests(self.request)
         self.assertSetEqual(set_of_course_keys(courses + courses_in_progress), set_of_course_keys(found_courses))
         self.assertSetEqual(
             set_of_course_keys(courses_in_progress), set_of_course_keys(unsucceeded_course_actions, 'course_key')

@@ -387,7 +387,7 @@ def _accessible_courses_summary_iter(request, org=None):
     return courses_summary, in_process_course_actions
 
 
-def _accessible_courses_iter(request):
+def _accessible_courses_iter_for_tests(request):
     """
     List all courses available to the logged in user by iterating through all the courses.
     CourseSummary objects are used for lisitng purposes.
@@ -411,6 +411,34 @@ def _accessible_courses_iter(request):
         return has_studio_read_access(request.user, course.id)
 
     courses = six.moves.filter(course_filter, modulestore().get_course_summaries())
+
+    in_process_course_actions = get_in_process_course_actions(request)
+    return courses, in_process_course_actions
+
+def _accessible_courses_iter(request):
+    """
+    List all courses available to the logged in user by iterating through all the courses.
+    """
+    def course_filter(course):
+        """
+        Filter out unusable and inaccessible courses
+        """
+        if isinstance(course, ErrorDescriptor):
+            return False
+
+        # Custom Courses for edX (CCX) is an edX feature for re-using course content.
+        # CCXs cannot be edited in Studio (aka cms) and should not be shown in this dashboard.
+        if isinstance(course.id, CCXLocator):
+            return False
+
+        # pylint: disable=fixme
+        # TODO remove this condition when templates purged from db
+        if course.location.course == 'templates':
+            return False
+
+        return has_studio_read_access(request.user, course.id)
+
+    courses = six.moves.filter(course_filter, modulestore().get_courses())
 
     in_process_course_actions = get_in_process_course_actions(request)
     return courses, in_process_course_actions
