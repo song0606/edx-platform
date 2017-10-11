@@ -1,6 +1,7 @@
 """
 Fragment for rendering the course dates sidebar.
 """
+from django.http import Http404
 from django.template.loader import render_to_string
 from opaque_keys.edx.keys import CourseKey
 from web_fragments.fragment import Fragment
@@ -26,3 +27,16 @@ class CourseDatesFragmentView(EdxFragmentView):
         }
         html = render_to_string('course_experience/course-dates-fragment.html', context)
         return Fragment(html)
+
+
+class CourseDatesFragmentMobileView(CourseDatesFragmentView):
+    """
+    A course dates fragment to show dates on mobile apps.
+    """
+    def get(self, request, *args, **kwargs):
+        # return 404 for unauthenticated user, it will save
+        # some extra calls to server from mobile app
+        if not request.user.is_authenticated():
+            raise Http404
+
+        return super(CourseDatesFragmentMobileView, self).get(request, *args, **kwargs)
